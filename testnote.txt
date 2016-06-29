@@ -1,0 +1,5 @@
+Elso sor: most tesztelem a dolgokat.
+Masodik sor: meg mindig tesztelek.
+Harmadik sor: nem tudom abbahagyni a tesztet.
+Negyedik sor: csak melo, jatek semmi. Jack besavanyodik.
+
