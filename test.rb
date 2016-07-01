@@ -198,7 +198,7 @@ class Person
 		@age = age
 	end
 
-	def name # GETTER METHOD WHICH ENABLES US TO ACCESS THE INSTANCE VARIABLES OUTSIDE OF THE CLASS
+	def name # GETTER METHOD WHICH ENABLES US TO ACCESS THE INSTANCE VARIABLES OUTSIDE THE CLASS
 		@name
 	end
 
@@ -228,7 +228,7 @@ class Ember
 		@age = age
 	end
 
-	def name # GETTER METHOD WHICH ENABLES US TO ACCESS THE INSTANCE VARIABLES OUTSIDE OF THE CLASS
+	def name # GETTER METHOD WHICH ENABLES US TO ACCESS THE INSTANCE VARIABLES outside THE CLASS
 		@name
 	end
 
@@ -320,7 +320,7 @@ puts csavo1.age
 class MathFunctions # in this class we're only injecting so-called utility functions - we don't want to create actual instances of the class
 
 	#first way to define class variable by using self
-	def self.double(num) #this is here a Class method! self outside of a method refers to the class
+	def self.double(num) #this is here a Class method! self outside a method refers to the class
 		times_called; num * 2 #calling times_called everytime and perform the operation (these two could be in two lines, as well)
 	end
 
@@ -332,7 +332,7 @@ class MathFunctions # in this class we're only injecting so-called utility funct
 	end
 end
 
-	#third way to define class method   - outside of the class
+	#third way to define class method   - outside the class
 def MathFunctions.triple(num) # triple here is a class method on the MathFunction class
 	times_called; num * 3
 end
@@ -353,6 +353,10 @@ class Dog
 	def to_s 	#to_s is the standard Ruby method for converting an Object into a string. 
 				#You define to_s when you want a custom string representation for your class
 				#u can specify whatever u have to display user as a string you can directly specify in to_s method so that you dont need to call .to_s again
+				#to_s is a method that basically tells the puts method how to convert this object to a string. 
+				#So, take a Person class for example. When you pass a Person instance to a puts (put string) method - 
+				#what do you want to print? puts will look to to_s method implementation for the answer to that question. 
+				#(If you don't implement it yourself - the higher up classes have a default implementation, which is probably useless)
 		"Karcsi"
 	end
 
@@ -393,7 +397,7 @@ end
 
 =end
 
-# -----MODULES-----
+=begin -----MODULES-----
 
 #Modules as Namespaces
 
@@ -449,6 +453,223 @@ puts match2.complete
  company = Company.new
  company.name = "Los Pollos Hermanos"
  company.print_name
+
+
+#ENUMERABLE module - a built-in module  - note here we don't actually create a new module but use the built-in one - see other files
+
+require_relative 'player' # require_relative allows importing other .rb files
+require_relative 'team'
+
+#create Player instances
+player1 = Player.new("Karcsi", 13, 5); player2 = Player.new("Sanyi", 12, 4.5) # could be written in multiple lines without ;
+player3 = Player.new("Pali", 11, 3.7); player4 = Player.new("Jozsi", 16, 3.9)
+player5 = Player.new("Jani", 15, 4)
+
+#create Team instance
+red_team = Team.new("Red")
+red_team.add_players(player1, player2, player3, player4, player5) # use method defined in team.rb - use multiple arguments (utilize splat)
+
+#as the Team class includes the Enumerable module, its nice functionalities can now be used for the Team class' instances
+# eligible_players is a variable here that stores the values specified
+# the .each method was applied to @players array (see other file) so all Enumerable functionalities are called on this array
+eligible_players = red_team	.select { |player| (12..15) === player.age } # note the ===
+							.reject { |player| player.skill_level < 4.4 }
+puts "eligible_players:"
+puts eligible_players # eligible_players utilizes the Player class' to_s method!
+
+=end
+
+
+=begin ----- SCOPE -----
+
+# variable scope
+
+v1 = "karcsi outside"
+
+class MyClass
+	def my_method 
+		# p v1 EXCEPTION THROWN ERROR - THIS DOESN'T RECOGNIZE THE VARIABLES DECLARED outside THE CLASS
+		v1 = "karcsi inside"
+		puts "v1 inside the class"
+		p v1
+		puts "local_variables inside the class"
+		p local_variables
+	end
+end
+
+
+puts "v1 outside the class"
+p v1
+obj = MyClass.new
+obj.my_method
+puts "local_variables when obj instance is also defined"
+p local_variables
+puts "self"
+p self
+
+# Constant scope
+
+module Test
+	PI = 3.14 # PI is a constant here, starting with uppercase
+
+	class Test2
+		def what_is_pi
+			puts PI # this method can see Pi which is declared outside the method (and even the class)
+		end
+	end
+end
+
+Test::Test2.new.what_is_pi # note that without    Test::     Test2 would not be recognized
+
+module MyModule # the module and its class run without calling them!
+	MyConstant = "karcsi is Outer Constant"
+	class MyClass
+		puts "MyConstant before change:"
+		puts MyConstant
+		MyConstant = "karcsi is Inner Constant" # note a Constant normally shouldn't be changed 
+												# so this is just a demonstration of how uppercase changes the behaviour
+												# uppercase and lowecase is something to be checked when a code doesn't work as expected
+		puts "MyConstant after change:"
+		puts MyConstant
+	end
+	puts "MyConstant after change BUT outside the class where is was changed:"
+	puts MyConstant
+end
+
+
+# block scope
+
+class BankAccount
+	attr_accessor :id, :amount
+	def initialize(id, amount)
+		@id = id
+		@amount = amount
+	end
+end
+
+account1 = BankAccount.new(123, 10000)
+account2 = BankAccount.new(456, 99000)
+account3 = BankAccount.new(789, 55500)
+accounts = [account1, account2, account3]
+
+total_sum = 0
+accounts.each do |account| 	# as this is a block, total_sum's value is inherited from outside 
+							# if this was a method, total_sum would be a totally new local variable within the method
+	total_sum += account.amount # add each element's (class instances) 'amount' argument
+end
+
+puts "total_sum:"
+puts total_sum
+
+# block local scope
+
+arr = [5, 4, 1]
+current_number = 10
+
+arr.each do |current_number| # current_number as parameter is not the same as the variable current_number declared above
+	some_var = 20 # variable declared inside the block is not available outside the block
+	print current_number.to_s + " " # each element of the array is printed as string concatenated with a white space
+end
+puts # just put a blank line
+puts "current_number outside the block should remain 10:"
+puts current_number
+
+
+adjustment = 5
+arr.each do |current_number;adjustment| # note the semicolon that declares adjustment as a block-local variable
+	adjustment = 10 # this is now a block-local variable, not effecting the adjustment variable declared outside the block
+	print "#{current_number + adjustment} " # note how we print the math operation
+end
+puts #blank line
+puts "adjustment outside the block should not be affected:"
+puts adjustment 
+
+
+=end
+
+
+# ----- ACCESS CONTROL -----
+
+class Car
+	def initialize(speed, comfort)
+		@rating = speed * comfort # details of how rating is calculated are kept inside the class
+	end
+
+	def rating
+		@rating # return @rating instance variable
+	end
+end
+
+puts Car.new(4, 5).rating # even if the way of calculating rating is changing, it will not effect the actual API
+
+
+class MyAlgorithm
+	private
+	def test1
+		"private method"
+	end
+
+	protected
+	def test2
+		"protected method"
+	end
+
+	public # by default all methods are public so this keyword is only needed when there are other types of methods above
+	def test3
+		"public method" #a method can be public if we want to access it from outside the class
+	end
+end
+
+
+class Another
+	def test1
+		"this will be a private method but declared later on"
+	end
+
+	private :test1
+end
+
+
+
+class Person
+	def initialize(age)
+		self.age = age # LEGAL - EXCEPTION
+						# without self Ruby would interpret age as a local variable
+						# and every time you finish the constructor, the age local variable would go out of scope
+						# So only meaningful way of calling age setter, is to call it using self.
+						# So therefore, this is an exception, when you're trying to set a variable value, 
+						# you are allowed to code self, even if the age setter is a private method.
+						# so only the setter methods are allowed to be called with a receiver
+						# below age is a setter method, it sets the age 
+		puts my_age
+		# puts self.my_age would be illegal
+		# as we cannot use self or any other receiver to call PRIVATE METHOD
+	end
+
+	private
+	def my_age
+		@age
+	end
+
+	def age=(age)
+		@age = age
+	end
+end
+
+Person.new(25)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
